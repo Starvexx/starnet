@@ -10,6 +10,8 @@ import copy
 import pickle
 import tifffile as tiff
 
+from astropy.io import fits
+
 from matplotlib import pyplot as plt
 
 from IPython import display
@@ -305,9 +307,30 @@ class StarNet():
                 pickle.dump(self.history, f)
       
     def transform(self, in_name, out_name):
-        data = tiff.imread(in_name)
+        file_suffix = in_name.split(sep='.')[-1]
+        
+        if file_suffix in ['tiff', 'tif']:
+            data = tiff.imread(in_name)
+        elif file_suffix in ['fits', 'fit']:
+            in_head = fits.getheader(in_name)
+            dtype = in_head['BITPIX']
+            if dtype == 8:
+                data = np.array(fits.getdata(in_name), dtype='uint8')
+            elif dtype == 16:
+                data = np.array(fits.getdata(in_name), dtype='int16')
+            elif dtype == 32:
+                data = np.array(fits.getdata(in_name), dtype='int32')
+            elif dtype == 64:
+                data = np.array(fits.getdata(in_name), dtype='int64')
+            elif dtype == -32:
+                data = np.array(fits.getdata(in_name), dtype='float32')
+            elif dtype == -64:
+                data = np.array(fits.getdata(in_name), dtype='float64')
+        else:
+            raise ValueError('Unknown image format:', file_suffix)
+
         if len(data.shape) > 3:
-            layer = input("Tiff has %d layers, please enter layer to process: "%data.shape[0])
+            layer = input("Image has %d layers, please enter layer to process: "%data.shape[0])
             layer = int(layer)
             data=data[layer]
             
@@ -316,6 +339,9 @@ class StarNet():
             image = (data / 255.0 / 255.0).astype('float32')
         elif input_dtype == 'uint8':
             image = (data / 255.0).astype('float32')
+        elif input_dtype == 'float32':
+            img_max = np.max(data)
+            image = (data / img_max).astype('float32')
         else:
             raise ValueError('Unknown image dtype:', data.dtype)
             
@@ -372,10 +398,22 @@ class StarNet():
         else:
             output = output[offset:-(offset+dh), offset:-(offset+dw), :]
         
-        if input_dtype == 'uint8':
-            tiff.imsave(out_name, (output * 255).astype('uint8'))
+        ### TODO: Fix the following so that the values in the output are
+        ### stretched accordingly to the data type independently from
+        ### filetype.
+
+        if file_suffix in ['tiff', 'tif']:
+            if input_dtype == 'uint8':
+                tiff.imsave(out_name, (output * 255).astype('uint8'))
+            elif input_dtype == 'uint16':
+                tiff.imsave(out_name, (output * 255 * 255).astype('uint16'))
+        elif file_suffix in ['fits', 'fit']:
+            output *= img_max
+            hdu = fits.PrimaryHDU(data=output, header=in_head)
+            hdu.writeto(out_name, overwrite=True)
         else:
-            tiff.imsave(out_name, (output * 255 * 255).astype('uint16'))
+            raise ValueError('Unknown image format:', file_suffix)
+
         
     def _generator(self, m):
         layers = []
