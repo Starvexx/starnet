@@ -1,5 +1,9 @@
+### Exclude the following forlders from syncing.
 .idea/
+.ipynb_chekpoints
+__pycahce__
 
+### Exclude weights files and .zip archives from syncing.
 *.h5
 *.zip
 *.pkl
