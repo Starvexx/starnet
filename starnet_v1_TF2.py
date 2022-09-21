@@ -335,13 +335,17 @@ class StarNet():
             data=data[layer]
             
         input_dtype = data.dtype
-        if input_dtype == 'uint16':
-            image = (data / 255.0 / 255.0).astype('float32')
-        elif input_dtype == 'uint8':
+        if input_dtype == 'uint8':
             image = (data / 255.0).astype('float32')
-        elif input_dtype == 'float32':
+        elif input_dtype == 'uint16':
+            image = (data / (255.0**2)).astype('float32')
+        elif input_dtype == 'uint32':
+            image = (data / (255.0**4)).astype('float32')
+        elif input_dtype == 'uint64':
+            image = (data / 255.0**8)).astype('float32')
+        elif input_dtype in ['float32', 'float64']:
             img_max = np.max(data)
-            image = (data / img_max).astype('float32')
+            image = data.astype('float32') if img_max <= 0 else (data / img_max).astype('float32')
         else:
             raise ValueError('Unknown image dtype:', data.dtype)
             
@@ -406,7 +410,11 @@ class StarNet():
             if input_dtype == 'uint8':
                 tiff.imsave(out_name, (output * 255).astype('uint8'))
             elif input_dtype == 'uint16':
-                tiff.imsave(out_name, (output * 255 * 255).astype('uint16'))
+                tiff.imsave(out_name, (output * (255**2)).astype('uint16'))
+            elif input_dtype == 'uint32':
+                tiff.imsave((output * (255.0**4)).astype('float32'))
+            elif input_dtype == 'uint64':
+                tiff.imsave((output * (255.0**8)).astype('float32'))
         elif file_suffix in ['fits', 'fit']:
             output *= img_max
             hdu = fits.PrimaryHDU(data=output, header=in_head)

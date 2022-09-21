@@ -12,13 +12,13 @@ from starnet_v1_TF2 import StarNet
 
 
 def main():
-    starnet = StarNet(mode='Greyscale')
+    starnet = StarNet(mode='Greyscale', stride=64)
     starnet.load_model('./weights', './history')
 
     #in_name = "./rgb_test5.tif"
     #out_name = "../../Nemesis/starnet/test.tif"
-    in_name = "../../Nemesis/starnet/Orion_B_IRAC_Field1_i1.resamp.stretched.fits"
-    out_name = "../../Nemesis/starnet/Orion_B_IRAC_Field1_i1.resamp.starless.fits"
+    in_name = "../../Nemesis/starnet/test.tif"
+    out_name = "../../Nemesis/starnet/test_starless.tif"
 
     starnet.transform(in_name, out_name)
 
