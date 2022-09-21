@@ -317,11 +317,11 @@ class StarNet():
             if dtype == 8:
                 data = np.array(fits.getdata(in_name), dtype='uint8')
             elif dtype == 16:
-                data = np.array(fits.getdata(in_name), dtype='int16')
+                data = np.array(fits.getdata(in_name), dtype='uint16')
             elif dtype == 32:
-                data = np.array(fits.getdata(in_name), dtype='int32')
+                data = np.array(fits.getdata(in_name), dtype='uint32')
             elif dtype == 64:
-                data = np.array(fits.getdata(in_name), dtype='int64')
+                data = np.array(fits.getdata(in_name), dtype='uint64')
             elif dtype == -32:
                 data = np.array(fits.getdata(in_name), dtype='float32')
             elif dtype == -64:
@@ -372,6 +372,8 @@ class StarNet():
         dh = ith * self.stride - h
         dw = itw * self.stride - w
         
+        i = image
+
         image = np.concatenate((image, image[(h - dh) :, :, :]), axis = 0)
         image = np.concatenate((image, image[:, (w - dw) :, :]), axis = 1)
         
@@ -545,7 +547,7 @@ class StarNet():
         layers.append(rectified)
             
         # layer 2
-        convolved = L.Conv2D(filters[1], kernel_size = 3, strides = (2, 2), padding="valid")(layers[-1])
+        convolved = L.Conv2D(filters[1], kernel_size = 3, strides = (2, 2), padding="same")(layers[-1])
         normalized = L.BatchNormalization()(convolved, training = True)
         rectified = L.LeakyReLU(alpha = 0.2)(normalized)
         layers.append(rectified)
@@ -557,7 +559,7 @@ class StarNet():
         layers.append(rectified)
             
         # layer 4
-        convolved = L.Conv2D(filters[3], kernel_size = 3, strides = (2, 2), padding="valid")(layers[-1])
+        convolved = L.Conv2D(filters[3], kernel_size = 3, strides = (2, 2), padding="same")(layers[-1])
         normalized = L.BatchNormalization()(convolved, training = True)
         rectified = L.LeakyReLU(alpha = 0.2)(normalized)
         layers.append(rectified)
@@ -569,7 +571,7 @@ class StarNet():
         layers.append(rectified)
             
         # layer 6
-        convolved = L.Conv2D(filters[5], kernel_size = 3, strides = (2, 2), padding="valid")(layers[-1])
+        convolved = L.Conv2D(filters[5], kernel_size = 3, strides = (2, 2), padding="same")(layers[-1])
         normalized = L.BatchNormalization()(convolved, training = True)
         rectified = L.LeakyReLU(alpha = 0.2)(normalized)
         layers.append(rectified)
@@ -581,13 +583,13 @@ class StarNet():
         layers.append(rectified)
             
         # layer 8
-        convolved = L.Conv2D(filters[7], kernel_size = 3, strides = (2, 2), padding="valid")(layers[-1])
+        convolved = L.Conv2D(filters[7], kernel_size = 3, strides = (2, 2), padding="same")(layers[-1])
         normalized = L.BatchNormalization()(convolved, training = True)
         rectified = L.LeakyReLU(alpha = 0.2)(normalized)
         layers.append(rectified)
             
         # layer 9
-        convolved = L.Conv2D(filters[8], kernel_size = 3, strides = (2, 2), padding="valid")(layers[-1])
+        convolved = L.Conv2D(filters[8], kernel_size = 3, strides = (2, 2), padding="same")(layers[-1])
         normalized = L.BatchNormalization()(convolved, training = True)
         rectified = L.LeakyReLU(alpha = 0.2)(normalized)
         layers.append(rectified)
