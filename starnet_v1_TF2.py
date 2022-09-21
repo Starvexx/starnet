@@ -342,7 +342,7 @@ class StarNet():
         elif input_dtype == 'uint32':
             image = (data / (255.0**4)).astype('float32')
         elif input_dtype == 'uint64':
-            image = (data / 255.0**8)).astype('float32')
+            image = (data / (255.0**8)).astype('float32')
         elif input_dtype in ['float32', 'float64']:
             img_max = np.max(data)
             image = data.astype('float32') if img_max <= 0 else (data / img_max).astype('float32')
