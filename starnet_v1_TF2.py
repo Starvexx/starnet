@@ -344,8 +344,11 @@ class StarNet():
         elif input_dtype == 'uint64':
             image = (data / (255.0**8)).astype('float32')
         elif input_dtype in ['float32', 'float64']:
+            img_min = np.nanmin(data)
+            data += np.abs(img_min)
             img_max = np.max(data)
-            image = data.astype('float32') if img_max <= 0 else (data / img_max).astype('float32')
+            image = (data / img_max).astype('float32')
+            #image = data.astype('float32') if img_max <= 0 else (data / img_max).astype('float32')
         else:
             raise ValueError('Unknown image dtype:', data.dtype)
             
@@ -419,6 +422,7 @@ class StarNet():
                 tiff.imsave((output * (255.0**8)).astype('float32'))
         elif file_suffix in ['fits', 'fit']:
             output *= img_max
+            output += img_min
             hdu = fits.PrimaryHDU(data=output, header=in_head)
             hdu.writeto(out_name, overwrite=True)
         else:
